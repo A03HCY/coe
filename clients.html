@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>在线客户端列表</title>
+</head>
+<body>
+    <h1>在线客户端列表</h1>
+    <ul>
+        {% for client in clients %}
+            <li>{{ client }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
