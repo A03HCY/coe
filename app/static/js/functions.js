@@ -30,15 +30,16 @@ $.extend({
             method: 'GET',
             url: '/online_clients',
             success: function (response) {
-                try {
-                    online_clients = response;
-                    if (func_suc != null) func_suc();
-                    console.log('Get online_clients successful');
-                } catch (err) {
-                    online_clients = {};
-                    console.log('Unable to get online_clients');
-                    if (func_err != null) func_err();
-                }
+                if (response)
+                    try {
+                        online_clients = response;
+                        if (func_suc != null) func_suc();
+                        console.log('Get online_clients successful');
+                    } catch (err) {
+                        online_clients = {};
+                        console.log('Unable to get online_clients');
+                        if (func_err != null) func_err();
+                    }
             }
         });
     }
@@ -58,9 +59,48 @@ $.extend({
                     message: "刷新完成",
                     closeOnOutsideClick: true
                 });
-            }, () => {}
+            }, () => { }
         );
     }
 });
+
+$.extend({
+    is_online: (uuid) => {
+        if (uuid == '') {
+            mdui.snackbar({
+                message: "未选择设备",
+                closeOnOutsideClick: true
+            });
+            return false;
+        }
+        if (!(uuid in online_clients)) {
+            mdui.snackbar({
+                message: "设备离线",
+                closeOnOutsideClick: true
+            });
+            return false;
+        }
+        return true;
+    }
+});
+
+// Panel 区域函数
+
+function show_info() {
+    let client_uuid = $('#index-select').val();
+    if (!$.is_online(client_uuid)) return;
+    let client_info = online_clients[client_uuid][1];
+    $('#computer-name').html(client_info['Computer Name']);
+    $('#computer-system').html(client_info['Operating System']);
+    $('#computer-version').html(client_info['OS Version']);
+    $('#computer-architecture').html(String(client_info['Architecture']));
+    $('#computer-cpu').html(client_info['Processor']);
+    $('#computer-frequency').html(client_info['Frequency']);
+    $('#computer-memory').html(client_info['Memory']);
+    mdui.snackbar({
+        message: "完成",
+        closeOnOutsideClick: true
+    });
+}
 
 // Transfer 区域函数

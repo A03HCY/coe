@@ -9,7 +9,6 @@ app = Flask(__name__)
 # 路由，用于获取在线客户端列表
 @app.route('/online_clients', methods=['GET'])
 def get_online_clients():
-    if not connection_thread.is_alive(): return 'Server is not running.'
     with lock:
         # 返回在线客户端的字典
         client_addresses = {client_uuid: [value[0].getpeername(), value[1]] for client_uuid, value in online_clients.items()}

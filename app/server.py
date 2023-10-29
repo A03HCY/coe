@@ -17,6 +17,9 @@ lock = threading.Lock()
 # 锁字典，用于每个客户端的访问保护
 client_locks = {}
 
+# 字典，用于让前端操作每个客户端的断开
+client_ends = {}
+
 
 def generate():
     # 创建套接字并绑定地址
@@ -52,20 +55,11 @@ def handle_client(client_socket, client_address):
 
     # 创建客户端的线程锁
     client_locks[client_uuid] = threading.Lock()
+    client_ends[client_uuid]  = False
 
     # 处理客户端消息
     while True:
-        continue
-        try:
-            message = Protocol().load_stream(client_socket.recv)
-            if message:
-                # 在服务端打印客户端发送的消息
-                print('客户端消息:', message.meta)
-            else:
-                break
-        except Exception as e:
-            print('处理客户端消息出错:', e)
-            break
+        if client_ends[client_uuid]: break
 
     # 关闭连接
     with lock:

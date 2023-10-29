@@ -37,7 +37,7 @@
 
         <mdui-navigation-rail-item id="index" autofocus icon="computer">面板</mdui-navigation-rail-item>
         <mdui-navigation-rail-item id="trans" autofocus icon="swap_horiz">传输</mdui-navigation-rail-item>
-        <mdui-navigation-rail-item id="control" autofocus icon="pest_control--outlined">操控</mdui-navigation-rail-item>
+        <mdui-navigation-rail-item id="control" autofocus icon="pest_control--outlined">操作</mdui-navigation-rail-item>
     </mdui-navigation-rail>
 
 
@@ -45,10 +45,41 @@
         <mdui-button onclick="req_status()">服务端状态</mdui-button>
         <mdui-button onclick="start_server()">启动</mdui-button>
         <mdui-button onclick="$.reload_select('#index-select')">刷新列表</mdui-button>
+        <mdui-button onclick="show_info()">获取信息</mdui-button>
         <div id="req_1"></div>
         <div id="req_2"></div>
         <mdui-select id="index-select" variant="outlined" placeholder="未选择目标" icon="computer">
         </mdui-select>
+        <table class="mdui-table">
+            <tr>
+                <td>名称</td>
+                <td id="computer-name"></td>
+            </tr>
+            <tr>
+                <td>系统</td>
+                <td id="computer-system"></td>
+            </tr>
+            <tr>
+                <td>版本</td>
+                <td id="computer-version"></td>
+            </tr>
+            <tr>
+                <td>架构</td>
+                <td id="computer-architecture"></td>
+            </tr>
+            <tr>
+                <td>CPU</td>
+                <td id="computer-cpu"></td>
+            </tr>
+            <tr>
+                <td>频率</td>
+                <td id="computer-frequency"></td>
+            </tr>
+            <tr>
+                <td>内存</td>
+                <td id="computer-memory"></td>
+            </tr>
+        </table>
     </div>
     <div id="trans-panel" class="hidden" style="overflow: auto">
         <mdui-select id="trans-select" variant="outlined" placeholder="未选择目标" icon="computer">
