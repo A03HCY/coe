@@ -30,6 +30,7 @@ class Protocol:
     def update(self):
         # update the head_data
         self.leng = len(self.meta)
+        return self
     
     def upmeta(self, data):
         # reset the meta data
@@ -49,7 +50,6 @@ class Protocol:
     
     @property
     def json(self) -> dict:
-        print(self.code)
         data = literal_eval(self.code)
         if type(data) != dict:
             data = {data}
@@ -209,10 +209,6 @@ class Autils:
         self.used = False
         return self.ptcl
 
-# Todo Apis:
-#   List processing datas in recving or sending
-#   then we need a Manager
-
 class Acdpnet:
     def __init__(self):
         self.ok = False
@@ -367,30 +363,3 @@ class Acdpnet:
     def info(data:Protocol):
         info = Protocol(data.head, extension='.multi_head')
         return info
-
-
-class Netgroup:
-    def __init__(self):
-        self.pool = {}
-    
-    def add(self, net:Acdpnet, name:str):
-        self.pool[name] = net
-    
-    def net(self, name:str) -> Acdpnet:
-        return self.pool.get(name)
-    
-    def new(self, name:str, read, write) -> Acdpnet:
-        self.pool[name] = Acdpnet().setio(read=read, write=write)
-        return self.pool[name]
-    
-    def remove(self, name:str):
-        pass
-
-    def destroy(self, name:str):
-        pass
-
-
-'''
-.multi-{}.{safecode}.extn.args
-.extn.args
-'''

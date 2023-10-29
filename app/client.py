@@ -11,24 +11,15 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((SERVER_ADDRESS, SERVER_PORT))
 print('已连接到服务器')
 
-identity = Protocol(extension='signup').upmeta(tools.get_system_info())
+identity = Protocol(extension='signup').upmeta(tools.used_for_singup())
 identity.create_stream(client_socket.send)
 
 # 不断发送请求
 while True:
     # 从用户输入获取请求
-    request = input('请输入信息：')
+    request = Protocol().load_stream(client_socket.recv)
 
-    # 发送请求
-    client_socket.send(request.encode())
-
-    # 接收并显示服务器的响应
-    response = client_socket.recv(1024)
-    print('服务器响应:', response.decode())
-
-    # 检查是否退出
-    if request.lower() == 'quit':
-        break
+    Protocol(extension='response').upmeta(request.meta).create_stream(client_socket.send)
 
 # 关闭连接
 client_socket.close()

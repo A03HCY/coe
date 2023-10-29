@@ -16,13 +16,6 @@ def get_system_info():
     except:
         return 'Unable to get system information'
 
-'''system_info = get_system_info()
-if isinstance(system_info, dict):
-    for key, value in system_info.items():
-        print(f"{key}: {value}")
-else:
-    print(system_info)'''
-
 
 def get_memory_info():
     try:
@@ -36,8 +29,6 @@ def get_memory_info():
     except:
         return 'Unable to get memory information'
 
-#print(get_memory_info())
-
 
 def get_cpu_info():
     try:
@@ -50,3 +41,17 @@ def get_cpu_info():
         return cpu
     except:
         return 'Unable to get cpu information'
+
+
+def used_for_singup():
+    try:
+        system = get_system_info()
+        memory = get_memory_info()['Total']
+        cpu    = get_cpu_info()['Frequency']
+        system.update({
+            'Memory': memory,
+            'Frequency': cpu
+        })
+        return system
+    except:
+        return 'Unable to get information'
