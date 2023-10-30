@@ -1,5 +1,6 @@
 import platform
 import psutil
+import pyautogui, io
 
 
 def get_system_info():
@@ -55,3 +56,10 @@ def used_for_singup():
         return system
     except:
         return 'Unable to get information'
+
+
+def screenshot() -> io.BytesIO:
+    im = pyautogui.screenshot()
+    temp = io.BytesIO()
+    im.save(temp, format='png')
+    return temp

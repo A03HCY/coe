@@ -5,8 +5,9 @@ from protocol import *
 
 
 # 定义服务器地址和端口
-SERVER_ADDRESS = 'localhost'
+SERVER_ADDRESS = '0.0.0.0'
 SERVER_PORT = 12345
+SERVER_LISTEN = 5
 
 # 在线客户端的字典
 online_clients = {}
@@ -73,7 +74,7 @@ def handle_client(client_socket, client_address):
 def accept_connections():
     # 监听连接
     server_socket = generate()
-    server_socket.listen(5)
+    server_socket.listen(SERVER_LISTEN)
     print('等待客户端连接...')
     while True:
         client_socket, client_address = server_socket.accept()

@@ -17,9 +17,22 @@ identity.create_stream(client_socket.send)
 # 不断发送请求
 while True:
     # 从用户输入获取请求
-    request = Protocol().load_stream(client_socket.recv)
-
-    Protocol(extension='response').upmeta(request.meta).create_stream(client_socket.send)
+    request = Protocol().load_stream(client_socket.recv).json
+    respons = {}
+    
+    command = request.get('command', '')
+    
+    if command == 'cpu_status':
+        respons = tools.get_cpu_info()
+    elif command == 'memory_status':
+        respons = tools.get_memory_info()
+    elif command == 'screenshot':
+        respons = Protocol(extension='response')
+        respons.meta = tools.screenshot().getvalue()
+        respons.create_stream(client_socket.send)
+        continue
+        
+    Protocol(extension='response').upmeta(respons).create_stream(client_socket.send)
 
 # 关闭连接
 client_socket.close()

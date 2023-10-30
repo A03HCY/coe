@@ -25,6 +25,12 @@ $('#control').on('click', (e) => {
 });
 
 $.extend({
+    info: (info) => {
+        mdui.snackbar({
+            message: info,
+            closeOnOutsideClick: true
+        });
+    },
     online_clients: (func_suc, func_err) => {
         $.ajax({
             method: 'GET',
@@ -42,10 +48,7 @@ $.extend({
                     }
             }
         });
-    }
-});
-
-$.extend({
+    },
     reload_select: (id) => {
         $.online_clients(
             () => {
@@ -55,32 +58,33 @@ $.extend({
                     select_html += client_html;
                 }
                 $(id).html(select_html);
-                mdui.snackbar({
-                    message: "刷新完成",
-                    closeOnOutsideClick: true
-                });
+                $.info('刷新完成')
             }, () => { }
         );
-    }
-});
-
-$.extend({
+    },
     is_online: (uuid) => {
         if (uuid == '') {
-            mdui.snackbar({
-                message: "未选择设备",
-                closeOnOutsideClick: true
-            });
+            $.info('未选择设备')
             return false;
         }
         if (!(uuid in online_clients)) {
-            mdui.snackbar({
-                message: "设备离线",
-                closeOnOutsideClick: true
-            });
+            $.info('设备离线')
             return false;
         }
         return true;
+    },
+    bytes_resize: (size) => {
+        if (!size) return '';
+        var num = 1024.00; //byte
+        if (size < num)
+            return size + ' B';
+        if (size < Math.pow(num, 2))
+            return (size / num).toFixed(2) + ' KB'; //kb
+        if (size < Math.pow(num, 3))
+            return (size / Math.pow(num, 2)).toFixed(2) + ' MB'; //M
+        if (size < Math.pow(num, 4))
+            return (size / Math.pow(num, 3)).toFixed(2) + ' G'; //G
+        return (size / Math.pow(num, 4)).toFixed(2) + ' T'; //T
     }
 });
 
@@ -96,11 +100,17 @@ function show_info() {
     $('#computer-architecture').html(String(client_info['Architecture']));
     $('#computer-cpu').html(client_info['Processor']);
     $('#computer-frequency').html(client_info['Frequency']);
-    $('#computer-memory').html(client_info['Memory']);
-    mdui.snackbar({
-        message: "完成",
-        closeOnOutsideClick: true
-    });
+    $('#computer-memory').html($.bytes_resize(client_info['Memory']));
+    $.info('完成')
 }
 
 // Transfer 区域函数
+
+// Control 区域函数
+
+function screenshot() {
+    let client_uuid = $('#control-select').val();
+    if (!$.is_online(client_uuid)) return;
+    let url = '/screenshot?' + $.param({ uuid: client_uuid, time: Date.parse(new Date()) });
+    $('#screenshot').attr('src', url);
+}

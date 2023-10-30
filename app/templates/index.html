@@ -82,12 +82,27 @@
         </table>
     </div>
     <div id="trans-panel" class="hidden" style="overflow: auto">
+        <mdui-button onclick="$.reload_select('#trans-select')">刷新列表</mdui-button>
         <mdui-select id="trans-select" variant="outlined" placeholder="未选择目标" icon="computer">
         </mdui-select>
-        <mdui-button onclick="$.reload_select('#trans-select')">刷新列表</mdui-button>
     </div>
     <div id="control-panel" class="hidden" style="overflow: auto">
-        <div style="height: 1000px">页面内容 control</div>
+        <mdui-button onclick="$.reload_select('#control-select')">刷新列表</mdui-button>
+        <mdui-select id="control-select" variant="outlined" placeholder="未选择目标" icon="computer">
+        </mdui-select>
+        <mdui-tabs value="tab-1">
+            <mdui-tab id="#control-screen" value="tab-1">屏幕</mdui-tab>
+            <mdui-tab value="tab-2">Tab 2</mdui-tab>
+            <mdui-tab value="tab-3">Tab 3</mdui-tab>
+
+            <mdui-tab-panel slot="panel" value="tab-1">
+                <mdui-button onclick="screenshot()">截屏</mdui-button>
+                <br/>
+                <img id="screenshot" src="" alt="screenshot">
+            </mdui-tab-panel>
+            <mdui-tab-panel slot="panel" value="tab-2">Panel 2</mdui-tab-panel>
+            <mdui-tab-panel slot="panel" value="tab-3">Panel 3</mdui-tab-panel>
+        </mdui-tabs>
     </div>
     <mdui-dialog id="setting-panel" fullscreen>
         <mdui-button id="setting_close">关闭</mdui-button>
