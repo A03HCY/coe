@@ -111,6 +111,7 @@ class Protocol:
         func(self.head)
         self.stream_until(self.read, self.leng, writefunc=func)
         self.now = original_now
+        return self
     
     @staticmethod
     def ignore_stream(func, from_head:tuple) -> None:

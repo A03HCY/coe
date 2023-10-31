@@ -92,5 +92,21 @@ def accept_connections():
         client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
         client_thread.start()
 
+def is_alive(client_uuid) -> bool:
+    if not client_uuid in online_clients.keys(): return False
+    client_lock = client_locks[client_uuid]
+    if client_lock.locked(): return True
+    client_socket = online_clients[client_uuid][0]
+    with client_lock:
+        try:
+            Protocol(extension='alive').create_stream(client_socket.send)
+            Protocol().load_stream(client_socket.recv)
+            return True
+        except:
+            client_ends[client_uuid] = True
+            return False
+
+def check_alive():
+    for client_uuid in online_clients: is_alive(client_uuid)
 
 connection_thread = threading.Thread(target=accept_connections)

@@ -17,10 +17,11 @@ identity.create_stream(client_socket.send)
 # 不断发送请求
 while True:
     # 从用户输入获取请求
-    request = Protocol().load_stream(client_socket.recv).json
+    request = Protocol().load_stream(client_socket.recv)
     respons = {}
     
-    command = request.get('command', '')
+    command = request.extn
+    print(command)
     
     if command == 'cpu_status':
         respons = tools.get_cpu_info()
@@ -33,6 +34,7 @@ while True:
         continue
         
     Protocol(extension='response').upmeta(respons).create_stream(client_socket.send)
+    print('|--> sended')
 
 # 关闭连接
 client_socket.close()
