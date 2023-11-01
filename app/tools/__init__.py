@@ -49,7 +49,6 @@ def used_for_singup():
         cpu    = get_cpu_info()['Frequency']
         system.update({
             'Memory': memory,
-            'Frequency': cpu
         })
         return system
     except:

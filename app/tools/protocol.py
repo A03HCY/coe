@@ -27,6 +27,9 @@ class Protocol:
         self.update()
         return 'Type:{}\nLength:{:.0f}'.format(self.extn, self.leng)
     
+    def __call__(self, *args):
+        pass
+    
     def update(self):
         # update the head_data
         self.leng = len(self.meta)

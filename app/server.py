@@ -1,7 +1,7 @@
 import socket
 import threading
 import uuid
-from protocol import *
+from tools.protocol import *
 
 
 # 定义服务器地址和端口
@@ -20,6 +20,9 @@ client_locks = {}
 
 # 字典，用于让前端操作每个客户端的断开
 client_ends = {}
+
+# 客户端状态
+client_status = {}
 
 
 def generate():
@@ -57,6 +60,7 @@ def handle_client(client_socket, client_address):
     # 创建客户端的线程锁
     client_locks[client_uuid] = threading.Lock()
     client_ends[client_uuid]  = False
+    client_status[client_uuid] = ''
 
     # 处理客户端消息
     while True:
@@ -67,6 +71,7 @@ def handle_client(client_socket, client_address):
         del online_clients[client_uuid]
     # 删除客户端的线程锁
     del client_locks[client_uuid]
+    del client_status[client_uuid]
     client_socket.close()
     print('客户端已断开连接:', client_address)
 
@@ -98,9 +103,11 @@ def is_alive(client_uuid) -> bool:
     if client_lock.locked(): return True
     client_socket = online_clients[client_uuid][0]
     with client_lock:
+        client_status[client_uuid] = 'alive'
         try:
             Protocol(extension='alive').create_stream(client_socket.send)
             Protocol().load_stream(client_socket.recv)
+            client_status[client_uuid] = ''
             return True
         except:
             client_ends[client_uuid] = True
