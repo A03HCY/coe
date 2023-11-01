@@ -86,9 +86,22 @@
         <mdui-select id="trans-select" variant="outlined" placeholder="未选择目标" icon="computer">
         </mdui-select>
         <mdui-fab icon="edit"></mdui-fab>
+        <mdui-card style="width: 250px;">
+            <mdui-button-icon icon="more_horiz" style="float: right;"></mdui-button-icon>
+            <mdui-icon name='folder--outlined' style="font-size: 48px;width: 100%;text-align: center;"></mdui-icon>
+            <div class="mdui-prose" style="width: 100%;text-align: center;">
+                <p style="margin-bottom: 8px;">正文</p>
+            </div>
+            <mdui-divider></mdui-divider>
+            <div style="width: 100%;">
+                <mdui-button-icon icon="east" style="float: right;"></mdui-button-icon>
+            </div>
+        </mdui-card>
     </div>
     <div id="control-panel" class="hidden" style="overflow: auto">
         <mdui-button onclick="$.reload_select('#control-select')">刷新列表</mdui-button>
+        <mdui-button onclick="$.relink('#control-select');">重置连接</mdui-button>
+        <mdui-slider id="stream_quality" value="50" label="传输质量"></mdui-slider>
         <mdui-select id="control-select" variant="outlined" placeholder="未选择目标" icon="computer">
         </mdui-select>
         <mdui-tabs value="tab-1">
@@ -98,7 +111,8 @@
 
             <mdui-tab-panel slot="panel" value="tab-1">
                 <mdui-button onclick="screenshot()">截屏</mdui-button>
-                <br/>
+                <mdui-button onclick="screenshot_stream()">流</mdui-button>
+                <br />
                 <img id="screenshot" src="" alt="screenshot">
             </mdui-tab-panel>
             <mdui-tab-panel slot="panel" value="tab-2">Panel 2</mdui-tab-panel>

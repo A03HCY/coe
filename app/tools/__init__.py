@@ -54,10 +54,14 @@ def used_for_singup():
     except:
         return 'Unable to get information'
 
-def screenshot() -> io.BytesIO:
-    im = pyautogui.screenshot()
+def screenshot(quality=50) -> io.BytesIO:
     temp = io.BytesIO()
-    im.save(temp, format='png')
+    # 截图
+    im = pyautogui.screenshot()
+    # 转换为RGB模式
+    compressed_image = im.convert('RGB')
+    # 优化保存JPEG图像
+    compressed_image.save(temp, format='jpeg', optimize=True, quality=quality)
     return temp
 
 def get_disk_space(path='C:'):

@@ -29,9 +29,19 @@ def handle(client_socket):
         respons = tools.get_memory_info()
     elif command == 'screenshot':
         respons = Protocol(extension='response')
-        respons.meta = tools.screenshot().getvalue()
+        respons.meta = tools.screenshot(100).getvalue()
         respons.create_stream(client_socket.send)
         return
+    elif command == 'screen_stream':
+        quality = request.json.get('quality', 0)
+        try: quality = int(quality)
+        except: quality = 50
+        print('|--> 流传输, 质量:', quality)
+        while True:
+            respons = Protocol(extension='response')
+            respons.meta = tools.screenshot(quality).getvalue()
+            respons.create_stream(client_socket.send)
+            request = Protocol().load_stream(client_socket.recv) # if recv
     elif command == 'list_files':
         directory = request.json.get('directory')
         if directory:
@@ -54,5 +64,7 @@ def main_loop():
         except (ConnectionResetError, ConnectionRefusedError) as e:
             print('连接已断开，正在尝试重新连接...')
             time.sleep(5)  # 等待5秒后重新连接
+        except (struct.error, ConnectionAbortedError) as e:
+            print('服务端要求的重置连接...')
 
 main_loop()

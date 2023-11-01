@@ -85,7 +85,27 @@ $.extend({
         if (size < Math.pow(num, 4))
             return (size / Math.pow(num, 3)).toFixed(2) + ' G'; //G
         return (size / Math.pow(num, 4)).toFixed(2) + ' T'; //T
-    }
+    },
+    is_uuid: (uuid) => {
+        let s = "" + uuid;
+        s = s.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+        if (s === null) {
+            return false;
+        }
+        return true;
+    },
+    relink: (uuid) => {
+        if ($.is_uuid(uuid) == false) {
+            uuid = $(uuid).val();
+        }
+        $.ajax({
+            method: 'GET',
+            url: '/relink?uuid=' + uuid,
+            success: function (response) {
+                $.info('请求成功')
+            }
+        });
+    },
 });
 
 // Panel 区域函数
@@ -108,9 +128,18 @@ function show_info() {
 
 // Control 区域函数
 
+const slider = document.querySelector("#stream_quality");
+slider.labelFormatter = (value) => `传输质量 ${value}%`;
+
 function screenshot() {
     let client_uuid = $('#control-select').val();
-    if (!$.is_online(client_uuid)) return;
     let url = '/screenshot?' + $.param({ uuid: client_uuid, time: Date.parse(new Date()) });
+    $('#screenshot').attr('src', url);
+}
+
+function screenshot_stream() {
+    let client_uuid = $('#control-select').val();
+    let stream_quality = $('#stream_quality').val();
+    let url = '/screen_stream?' + $.param({ uuid: client_uuid, quality: stream_quality, time: Date.parse(new Date()) });
     $('#screenshot').attr('src', url);
 }
