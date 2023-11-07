@@ -15,6 +15,16 @@ def connect_to_server():
     print('已连接到服务器')
     return client_socket
 
+def read_file(file_path):
+    try:
+        with open(file_path, 'rb') as file:
+            content = file.read()
+        return content
+    except FileNotFoundError:
+        print(f"文件 '{file_path}' 不存在.")
+    except IOError:
+        print(f"读取文件 '{file_path}' 时发生错误.")
+
 def handle(client_socket):
     # 从用户输入获取请求
     request = Protocol().load_stream(client_socket.recv)
@@ -47,6 +57,12 @@ def handle(client_socket):
         if directory:
             file_list = tools.folder_files(directory)
             respons = {'file_list': file_list}
+        else:
+            respons = {'error': 'Missing directory parameter'}
+    elif command == 'trans_file':
+        directory = request.json.get('directory')
+        if directory:
+            respons = read_file(directory)
         else:
             respons = {'error': 'Missing directory parameter'}
     else:

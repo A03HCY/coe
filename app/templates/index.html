@@ -83,6 +83,8 @@
     </div>
     <div id="trans-panel" class="hidden" style="overflow: auto">
         <mdui-button onclick="$.reload_select('#trans-select')">刷新列表</mdui-button>
+        <mdui-button onclick="generate()">获取信息</mdui-button>
+        <mdui-button onclick="parent_folder()">上级目录</mdui-button>
         <mdui-select id="trans-select" variant="outlined" placeholder="未选择目标" icon="computer">
         </mdui-select>
         <mdui-text-field variant="outlined" id="trans-dir" label="目录"></mdui-text-field>
@@ -123,7 +125,7 @@
     function req_status() {
         $.ajax({
             method: 'GET',
-            url: '/server_status',
+            url: '/api/server_status',
             success: function (response) {
                 $("#req_1").html(response);
             }
@@ -132,7 +134,7 @@
     function start_server() {
         $.ajax({
             method: 'GET',
-            url: '/start_server',
+            url: '/api/start_server',
             success: function (response) {
                 $("#req_2").html(response);
             }

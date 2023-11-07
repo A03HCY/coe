@@ -34,7 +34,7 @@ $.extend({
     online_clients: (func_suc, func_err) => {
         $.ajax({
             method: 'GET',
-            url: '/online_clients',
+            url: '/api/online_clients',
             success: function (response) {
                 if (response)
                     try {
@@ -100,12 +100,38 @@ $.extend({
         }
         $.ajax({
             method: 'GET',
-            url: '/relink?uuid=' + uuid,
+            url: '/api/relink?uuid=' + uuid,
             success: function (response) {
                 $.info('请求成功')
             }
         });
     },
+    join_path: (base, relative) => {
+        // 移除基础目录末尾的斜杠
+        base = base.replace(/\/$/, '');
+        // 解析相对路径中的连续 ../
+        var parts = relative.split('/');
+        var stack = base.split('/');
+
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i] == '.') {
+                // 跳过 ./ 目录
+            } else if (parts[i] == '..') {
+                if (stack.length > 1 || stack[0] != '') {
+                    stack.pop();
+                }
+            } else {
+                stack.push(parts[i]);
+            }
+        }
+        if (stack.length == 0 || stack[0] == '') {
+            if (base[0] == '.') stack[0] = './';
+            else stack[0] = '/';
+        }
+        let path = stack.join('/');
+        if (path == '.') path = './';
+        return path
+    }
 });
 
 // Panel 区域函数
@@ -131,7 +157,7 @@ function generate_folder_files(json_data) {
     // 生成文件夹项的HTML代码
     for (let folder_name in json_data[0]) {
         let folder = json_data[0][folder_name];
-        html += `<mdui-list-item alignment="center" end-icon="arrow_right">`;
+        html += `<mdui-list-item name="${folder_name}" onclick="change_directory(this)" alignment="center" end-icon="arrow_right">`;
         html += `  ${folder_name}`;
         html += `  <mdui-icon slot="icon" name="folder--outlined"></mdui-icon>`;
         html += `</mdui-list-item>`;
@@ -140,28 +166,56 @@ function generate_folder_files(json_data) {
     for (let file_name in json_data[1]) {
         let file = json_data[1][file_name];
         let description = `${file['date']}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${$.bytes_resize(file['size']).replace(' ', '')}`;
-        html += `<mdui-list-item alignment="center" description="${description}" nonclickable="true" end-icon="arrow_right">`;
+        html += `<mdui-list-item alignment="center" name="${file_name}" description="${description}" nonclickable="true" end-icon="arrow_right">`;
         html += `  ${file_name}`;
         html += `  <mdui-icon slot="icon" name="insert_drive_file--outlined"></mdui-icon>`;
         html += `  <mdui-button-icon slot="end-icon" icon="delete--outlined"></mdui-button-icon>`;
         html += `  <mdui-button-icon slot="end-icon" icon="file_open--outlined"></mdui-button-icon>`;
-        html += `  <mdui-button-icon slot="end-icon" icon="file_download--outlined"></mdui-button-icon>`;
+        html += `  <mdui-button-icon onclick="test(this)" slot="end-icon" icon="file_download--outlined"></mdui-button-icon>`;
         html += `</mdui-list-item>`;
     }
     html += '</mdui-list>';
     return html;
 }
 
-function generate(){
+function generate() {
+    $('#trans-dir').val($.join_path('./', $('#trans-dir').val()));
     let client_uuid = $('#trans-select').val();
     let directory = $('#trans-dir').val();
     $.ajax({
         method: 'GET',
-        url: '/folder_files?uuid=' + client_uuid+'&directory=' + btoa(directory),
+        url: '/api/folder_files?uuid=' + client_uuid + '&directory=' + btoa(directory),
         success: function (response) {
             response = JSON.parse(response);
             $.info('请求成功');
             $('#trans-folder-files').html(generate_folder_files(response.file_list));
+        }
+    });
+}
+
+function change_directory(self) {
+    let dir = $('#trans-dir');
+    self = $(self);
+    dir.val($.join_path(dir.val(), self.attr('name')))
+    generate()
+}
+
+function parent_folder() {
+    let dir = $('#trans-dir');
+    dir.val($.join_path(dir.val(), '..'))
+    generate()
+}
+
+function test(self) {
+    self = $(self).parent();
+    let name = self.attr('name');
+    let client_uuid = $('#trans-select').val();
+    let directory = $.join_path($('#trans-dir').val(), name)
+    $.ajax({
+        method: 'GET',
+        url: '/api/trans_file?uuid=' + client_uuid + '&directory=' + btoa(directory),
+        success: function (response) {
+            console.log(response);
         }
     });
 }
@@ -173,13 +227,13 @@ slider.labelFormatter = (value) => `传输质量 ${value}%`;
 
 function screenshot() {
     let client_uuid = $('#control-select').val();
-    let url = '/screenshot?' + $.param({ uuid: client_uuid, time: Date.parse(new Date()) });
+    let url = '/api/screenshot?' + $.param({ uuid: client_uuid, time: Date.parse(new Date()) });
     $('#screenshot').attr('src', url);
 }
 
 function screenshot_stream() {
     let client_uuid = $('#control-select').val();
     let stream_quality = $('#stream_quality').val();
-    let url = '/screen_stream?' + $.param({ uuid: client_uuid, quality: stream_quality, time: Date.parse(new Date()) });
+    let url = '/api/screen_stream?' + $.param({ uuid: client_uuid, quality: stream_quality, time: Date.parse(new Date()) });
     $('#screenshot').attr('src', url);
 }
