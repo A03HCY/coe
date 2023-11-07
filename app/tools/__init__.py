@@ -1,8 +1,10 @@
 import platform
 import psutil
 import pyautogui, io
+import os
 from psutil._common import bytes2human
-
+from datetime import datetime
+from rich import print
 
 def get_system_info():
     try:
@@ -76,3 +78,26 @@ def get_disk():
     data = [list(i) for i in psutil.disk_partitions()]
     return data
     
+def folder_files(directory:str) -> list:
+    if not os.path.exists(directory):
+        print("目录不存在")
+        return []
+    result = [{}, {}]  # 存储文件夹和文件信息的结果列表
+    folders, files = result
+    for entry in os.scandir(directory):
+        if entry.is_dir():  # 处理文件夹
+            subfolders, subfiles = folder_files(entry.path)
+            folder_info = {
+                'children': len(subfolders) + len(subfiles),
+                'date': datetime.fromtimestamp(entry.stat().st_mtime).strftime('%Y-%m-%d')
+            }
+            folders[entry.name] = folder_info
+        else:  # 处理文件
+            file_info = {
+                'size': entry.stat().st_size,
+                'date': datetime.fromtimestamp(entry.stat().st_mtime).strftime('%Y-%m-%d'),
+                'type': os.path.splitext(entry.name)[1]
+            }
+            files[entry.name] = file_info
+
+    return result

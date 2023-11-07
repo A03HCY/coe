@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template, send_file, Response
 from api import *
+import json, base64
 
 
 # Flask应用程序
@@ -36,8 +37,19 @@ def server_status():
 def command():
     client_uuid = request.args.get('uuid', '')
     command = request.args.get('cmd', '')
-    respond = oneline_command(client_uuid, command)
+    data = request.args.get('data', '')
+    respond = oneline_command(client_uuid, command, data)
     return jsonify(respond.json)
+
+@app.route('/folder_files', methods=['GET'])
+def folder_files():
+    client_uuid = request.args.get('uuid', '')
+    data = request.args.get('directory', '')
+    data = base64.b64decode(data).decode(encoding='utf-8')
+    respond = oneline_command(client_uuid, 'folder_files', {
+        'directory': data
+    })
+    return json.dumps(respond.json)
 
 @app.route('/screenshot', methods=['GET'])
 def screenshot():

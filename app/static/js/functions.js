@@ -126,6 +126,46 @@ function show_info() {
 
 // Transfer 区域函数
 
+function generate_folder_files(json_data) {
+    let html = '<mdui-list>';
+    // 生成文件夹项的HTML代码
+    for (let folder_name in json_data[0]) {
+        let folder = json_data[0][folder_name];
+        html += `<mdui-list-item alignment="center" end-icon="arrow_right">`;
+        html += `  ${folder_name}`;
+        html += `  <mdui-icon slot="icon" name="folder--outlined"></mdui-icon>`;
+        html += `</mdui-list-item>`;
+    }
+    // 生成文件项的HTML代码
+    for (let file_name in json_data[1]) {
+        let file = json_data[1][file_name];
+        let description = `${file['date']}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${$.bytes_resize(file['size']).replace(' ', '')}`;
+        html += `<mdui-list-item alignment="center" description="${description}" nonclickable="true" end-icon="arrow_right">`;
+        html += `  ${file_name}`;
+        html += `  <mdui-icon slot="icon" name="insert_drive_file--outlined"></mdui-icon>`;
+        html += `  <mdui-button-icon slot="end-icon" icon="delete--outlined"></mdui-button-icon>`;
+        html += `  <mdui-button-icon slot="end-icon" icon="file_open--outlined"></mdui-button-icon>`;
+        html += `  <mdui-button-icon slot="end-icon" icon="file_download--outlined"></mdui-button-icon>`;
+        html += `</mdui-list-item>`;
+    }
+    html += '</mdui-list>';
+    return html;
+}
+
+function generate(){
+    let client_uuid = $('#trans-select').val();
+    let directory = $('#trans-dir').val();
+    $.ajax({
+        method: 'GET',
+        url: '/folder_files?uuid=' + client_uuid+'&directory=' + btoa(directory),
+        success: function (response) {
+            response = JSON.parse(response);
+            $.info('请求成功');
+            $('#trans-folder-files').html(generate_folder_files(response.file_list));
+        }
+    });
+}
+
 // Control 区域函数
 
 const slider = document.querySelector("#stream_quality");

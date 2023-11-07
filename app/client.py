@@ -42,10 +42,10 @@ def handle(client_socket):
             respons.meta = tools.screenshot(quality).getvalue()
             respons.create_stream(client_socket.send)
             request = Protocol().load_stream(client_socket.recv) # if recv
-    elif command == 'list_files':
+    elif command == 'folder_files':
         directory = request.json.get('directory')
         if directory:
-            file_list = os.listdir(directory)
+            file_list = tools.folder_files(directory)
             respons = {'file_list': file_list}
         else:
             respons = {'error': 'Missing directory parameter'}

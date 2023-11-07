@@ -85,18 +85,8 @@
         <mdui-button onclick="$.reload_select('#trans-select')">刷新列表</mdui-button>
         <mdui-select id="trans-select" variant="outlined" placeholder="未选择目标" icon="computer">
         </mdui-select>
-        <mdui-fab icon="edit"></mdui-fab>
-        <mdui-card style="width: 250px;">
-            <mdui-button-icon icon="more_horiz" style="float: right;"></mdui-button-icon>
-            <mdui-icon name='folder--outlined' style="font-size: 48px;width: 100%;text-align: center;"></mdui-icon>
-            <div class="mdui-prose" style="width: 100%;text-align: center;">
-                <p style="margin-bottom: 8px;">正文</p>
-            </div>
-            <mdui-divider></mdui-divider>
-            <div style="width: 100%;">
-                <mdui-button-icon icon="east" style="float: right;"></mdui-button-icon>
-            </div>
-        </mdui-card>
+        <mdui-text-field variant="outlined" id="trans-dir" label="目录"></mdui-text-field>
+        <div id="trans-folder-files"></div>
     </div>
     <div id="control-panel" class="hidden" style="overflow: auto">
         <mdui-button onclick="$.reload_select('#control-select')">刷新列表</mdui-button>

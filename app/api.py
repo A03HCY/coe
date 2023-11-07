@@ -12,11 +12,11 @@ def check_client(func):
     return wrapper
 
 @check_client
-def oneline_command(client_uuid:str, command:str) -> Protocol:
+def oneline_command(client_uuid:str, command:str, data=None) -> Protocol:
     client_socket = online_clients[client_uuid][0]
     with client_locks[client_uuid]:
         client_status[client_uuid] = command
-        Protocol(extension=command).create_stream(client_socket.send)
+        Protocol(extension=command).upmeta(data).create_stream(client_socket.send)
         respond = Protocol().load_stream(client_socket.recv)
         client_status[client_uuid] = ''
     return respond
