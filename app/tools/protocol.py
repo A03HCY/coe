@@ -127,9 +127,9 @@ class Protocol:
         Protocol.stream_until(func, meta_head[1], writefunc=file.write)
     
     @staticmethod
-    def convet_full_io_stream(fromfunc, tofunc) -> None:
+    def convet_full_io_stream(fromfunc, tofunc, save_head=True) -> None:
         meta_head = Protocol.parse_stream_head(fromfunc)
-        tofunc(meta_head[2])
+        if save_head: tofunc(meta_head[2])
         Protocol.stream_until(fromfunc, meta_head[1], writefunc=tofunc)
     
     @staticmethod

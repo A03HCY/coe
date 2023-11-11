@@ -5,6 +5,36 @@ import os
 from psutil._common import bytes2human
 from datetime import datetime
 from rich import print
+import re
+
+def join_path(base, relative):
+    # 移除基础目录末尾的斜杠
+    base = re.sub(r'/$', '', base)
+    # 解析相对路径中的连续 ../
+    parts = relative.split('/')
+    stack = base.split('/')
+
+    for part in parts:
+        if part == '.':
+            # 跳过 ./ 目录
+            continue
+        elif part == '..':
+            if len(stack) > 1 or stack[0] != '':
+                stack.pop()
+        else:
+            stack.append(part)
+
+    if len(stack) == 0 or stack[0] == '':
+        if base[0] == '.':
+            stack[0] = './'
+        else:
+            stack[0] = '/'
+
+    path = '/'.join(stack)
+    if path == '.':
+        path = './'
+    
+    return path
 
 def get_system_info():
     try:

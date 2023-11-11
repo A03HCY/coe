@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN" class="mdui-theme-auto">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Two+Tone" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mdui.css') }}">
+    <script src="{{ url_for('static', filename='js/mdui.global.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/extension.js') }}"></script>
+    <script>
+        mdui.setColorScheme('#0061a4');
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='xterm/css/xterm.css') }}">
+    <script src="{{ url_for('static', filename='xterm/lib/xterm.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/base64.js') }}"></script>
+
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .hidden-op {
+            opacity: 0;
+        }
+
+        .bar-center-element {
+            position: absolute;
+            left: 69px;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+    </style>
+
+    <title>COE</title>
+</head>
+
+<body>
+
+    <mdui-navigation-rail divider alignment="center">
+        <mdui-button-icon icon="menu" slot="top"></mdui-button-icon>
+        <mdui-button-icon id="settings" icon="settings" slot="bottom"></mdui-button-icon>
+
+        <mdui-navigation-rail-item id="index" autofocus icon="computer">面板</mdui-navigation-rail-item>
+        <mdui-navigation-rail-item id="trans" autofocus icon="swap_horiz">传输</mdui-navigation-rail-item>
+        <mdui-navigation-rail-item id="control" autofocus icon="pest_control--outlined">操作</mdui-navigation-rail-item>
+    </mdui-navigation-rail>
+
+
+    <div id="index-panel" style="overflow: auto">
+        <mdui-button onclick="req_status()">服务端状态</mdui-button>
+        <mdui-button onclick="start_server()">启动</mdui-button>
+        <mdui-button onclick="$.reload_select('#index-select')">刷新列表</mdui-button>
+        <mdui-button onclick="show_info()">获取信息</mdui-button>
+        <div id="req_1"></div>
+        <div id="req_2"></div>
+        <mdui-select id="index-select" variant="outlined" placeholder="未选择目标" icon="computer">
+        </mdui-select>
+        <table class="mdui-table">
+            <tr>
+                <td>名称</td>
+                <td id="computer-name"></td>
+            </tr>
+            <tr>
+                <td>系统</td>
+                <td id="computer-system"></td>
+            </tr>
+            <tr>
+                <td>版本</td>
+                <td id="computer-version"></td>
+            </tr>
+            <tr>
+                <td>架构</td>
+                <td id="computer-architecture"></td>
+            </tr>
+            <tr>
+                <td>CPU</td>
+                <td id="computer-cpu"></td>
+            </tr>
+            <tr>
+                <td>频率</td>
+                <td id="computer-frequency"></td>
+            </tr>
+            <tr>
+                <td>内存</td>
+                <td id="computer-memory"></td>
+            </tr>
+        </table>
+    </div>
+    <div id="trans-panel" class="hidden" style="overflow: auto;height: 100%;">
+        <mdui-button onclick="$.reload_select('#trans-select')">刷新列表</mdui-button>
+        <mdui-button onclick="generate()">获取信息</mdui-button>
+        <mdui-button onclick="parent_folder()">上级目录</mdui-button>
+        <mdui-select id="trans-select" variant="outlined" placeholder="未选择目标" icon="computer">
+        </mdui-select>
+        <mdui-text-field variant="outlined" id="trans-dir" label="目录"></mdui-text-field>
+        <div id="trans-folder-files" style="overflow: auto;height: 100%;width: 100%;"></div>
+
+    </div>
+    <div id="control-panel" class="hidden" style="overflow: auto">
+        <mdui-button onclick="$.reload_select('#control-select')">刷新列表</mdui-button>
+        <mdui-button onclick="$.relink('#control-select');">重置连接</mdui-button>
+        <mdui-slider id="stream_quality" value="50" label="传输质量"></mdui-slider>
+        <mdui-select id="control-select" variant="outlined" placeholder="未选择目标" icon="computer">
+        </mdui-select>
+        <mdui-tabs value="tab-1">
+            <mdui-tab id="#control-screen" value="tab-1">屏幕</mdui-tab>
+            <mdui-tab value="tab-2">终端</mdui-tab>
+            <mdui-tab value="tab-3">Tab 3</mdui-tab>
+
+            <mdui-tab-panel slot="panel" value="tab-1">
+                <mdui-button onclick="screenshot()">截屏</mdui-button>
+                <mdui-button onclick="screenshot_stream()">流</mdui-button>
+                <br />
+                <img id="screenshot" src="" alt="screenshot">
+            </mdui-tab-panel>
+            <mdui-tab-panel slot="panel" value="tab-2">
+                <div id="terminal"></div>
+            </mdui-tab-panel>
+            <mdui-tab-panel slot="panel" value="tab-3">Panel 3</mdui-tab-panel>
+        </mdui-tabs>
+    </div>
+    <mdui-dialog id="setting-panel" fullscreen>
+        <mdui-button id="setting_close">关闭</mdui-button>
+    </mdui-dialog>
+
+</body>
+
+<script>
+    $('#index').trigger('click');
+
+    function req_status() {
+        $.ajax({
+            method: 'GET',
+            url: '/api/server_status',
+            success: function (response) {
+                $("#req_1").html(response);
+            }
+        });
+    }
+    function start_server() {
+        $.ajax({
+            method: 'GET',
+            url: '/api/start_server',
+            success: function (response) {
+                $("#req_2").html(response);
+            }
+        });
+    }
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+    var term = new Terminal();
+    term.open(document.getElementById('terminal'));
+    term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+</script>
+
+</html>

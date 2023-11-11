@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Two+Tone" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mdui.css') }}">
+    <script src="{{ url_for('static', filename='js/mdui.global.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='highlight/styles/default.css') }}">
+
+    <script src="{{ url_for('static', filename='js/extension.js') }}"></script>
+    <script>
+        mdui.setColorScheme('#0061a4');
+    </script>
+
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .hidden-op {
+            opacity: 0;
+        }
+
+        .center-element {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+        #page {
+            width: 100%;
+            max-width: 900px;
+            margin-left: 0;
+            margin-right: 0;
+            margin: auto;
+        }
+    </style>
+
+    <title>View</title>
+</head>
+
+<body>
+    <mdui-top-app-bar class="bar">
+        <mdui-button-icon icon="menu"></mdui-button-icon>
+        <mdui-top-app-bar-title id="title">View</mdui-top-app-bar-title>
+        <div style="flex-grow: 1"></div>
+        <mdui-button-icon onclick="print_page()" icon="print--outlined"></mdui-button-icon>
+        <mdui-button-icon onclick="$.download_file(data.url, data.file_name)" icon="file_download--outlined"></mdui-button-icon>
+        <mdui-button-icon onclick="window.close()" icon="close"></mdui-button-icon>
+    </mdui-top-app-bar>
+    <div id="page">
+        <mdui-circular-progress class="center-element"></mdui-circular-progress>
+    </div>
+
+
+</body>
+
+
+<script src="{{ url_for('static', filename='js/language_map.js') }}"></script>
+<script src="{{ url_for('static', filename='highlight/highlight.js') }}"></script>
+<script src="{{ url_for('static', filename='js/marked.js') }}"></script>
+<script src="{{ url_for('static', filename='js/viewer.js') }}"></script>
+
+</html>

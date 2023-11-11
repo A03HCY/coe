@@ -10,7 +10,11 @@ app.register_blueprint(web_api, url_prefix='/api')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('app.html')
+
+@app.route('/view')
+def viewer():
+    return render_template('viewer.html')
 
 
 if __name__ == '__main__':

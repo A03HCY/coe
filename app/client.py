@@ -1,10 +1,11 @@
 from tools.protocol import *
-import socket, time
+import socket, time, os
 import tools
 
 # 定义服务器地址和端口
 SERVER_ADDRESS = 'localhost'
 SERVER_PORT = 12345
+
 
 # 创建套接字并连接服务器
 def connect_to_server():
@@ -25,33 +26,48 @@ def read_file(file_path):
     except IOError:
         print(f"读取文件 '{file_path}' 时发生错误.")
 
+def save_file(client_socket, data:Protocol):
+    directory = data.json.get('directory', '')
+    file_name = data.json.get('file_name', 'temp.file')
+    if not os.path.isdir(directory):
+        data.ignore_stream(client_socket.recv)
+        return
+    with open(os.path.join(directory, file_name), 'wb') as f:
+        data.convet_full_io_stream(client_socket.recv, f.write, save_head=False)
+
+
+
 def handle(client_socket):
     # 从用户输入获取请求
     request = Protocol().load_stream(client_socket.recv)
     respons = {}
     
     command = request.extn
-    print(command)
+    print('○', command)
     
     if command == 'cpu_status':
         respons = tools.get_cpu_info()
+    
     elif command == 'memory_status':
         respons = tools.get_memory_info()
+    
     elif command == 'screenshot':
         respons = Protocol(extension='response')
         respons.meta = tools.screenshot(100).getvalue()
         respons.create_stream(client_socket.send)
         return
+    
     elif command == 'screen_stream':
         quality = request.json.get('quality', 0)
         try: quality = int(quality)
         except: quality = 50
-        print('|--> 流传输, 质量:', quality)
+        print('├ 流传输, 质量:', quality)
         while True:
             respons = Protocol(extension='response')
             respons.meta = tools.screenshot(quality).getvalue()
             respons.create_stream(client_socket.send)
             request = Protocol().load_stream(client_socket.recv) # if recv
+    
     elif command == 'folder_files':
         directory = request.json.get('directory')
         if directory:
@@ -59,12 +75,23 @@ def handle(client_socket):
             respons = {'file_list': file_list}
         else:
             respons = {'error': 'Missing directory parameter'}
+    
     elif command == 'trans_file':
         directory = request.json.get('directory')
         if directory:
-            respons = read_file(directory)
+            respons = Protocol(extension='response')
+            respons.meta = read_file(directory)
+            respons.create_stream(client_socket.send)
+            return
         else:
             respons = {'error': 'Missing directory parameter'}
+    elif command == 'remove_file':
+        directory = request.json.get('directory', '')
+        if os.path.isfile(directory):
+            try:os.remove(directory)
+            except:pass
+    elif command == 'save_file':
+        save_file(client_socket, request)
     else:
         respons = {'error': 'Unknown command'}
         
@@ -76,7 +103,7 @@ def main_loop():
             client_socket = connect_to_server()
             while True:
                 handle(client_socket)
-                print('|--> sended')
+                print('├ sended')
         except (ConnectionResetError, ConnectionRefusedError) as e:
             print('连接已断开，正在尝试重新连接...')
             time.sleep(5)  # 等待5秒后重新连接

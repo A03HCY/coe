@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, request, send_file, Response
+from flask import Blueprint, jsonify, request, send_file, Response, make_response
 from server import *
-import json, base64
+import mimetypes
+import json, base64, os
 
 no_result = Protocol(extension='no_result')
 
@@ -37,9 +38,21 @@ def load_screen_stream(client_uuid:str, quality:int):
             Protocol(extension='OK').create_stream(client_socket.send)
             yield (b'--frame\r\n Content-Type: image/jpeg\r\n\r\n' + respond.meta)
 
+@check_client
+def save_file(client_uuid:str):
+    pass
+
 
 
 web_api = Blueprint('api', __name__)
+
+@web_api.route('/upload', methods=['POST'])
+def upload_file():
+    uploaded_file = request.files['file']
+    client_uuid = request.values.get('uuid', '')
+    if uploaded_file.filename == '':
+        return ''
+    return ''
 
 @web_api.route('/relink', methods=['GET'])
 def relink():
@@ -106,9 +119,23 @@ def screen_stream():
 @web_api.route('/trans_file', methods=['GET'])
 def trans_file():
     client_uuid = request.args.get('uuid', '')
-    data = request.args.get('directory', '')
-    data = base64.b64decode(data).decode(encoding='utf-8')
+    directory = request.args.get('directory', '')
+    data = base64.b64decode(directory).decode(encoding='utf-8')
     respond = oneline_command(client_uuid, 'trans_file', {
         'directory': data
     })
-    return str(respond.meta)
+    file_name = os.path.basename(directory)
+    respons = make_response(respond.meta)
+    mime_type = mimetypes.guess_type(file_name)[0]
+    respons.headers['Content-Disposition'] = 'attachment; filename={}'.format(file_name.encode().decode('latin-1'))
+    return respons
+
+@web_api.route('/remove_file', methods=['GET'])
+def remove_file():
+    client_uuid = request.args.get('uuid', '')
+    directory = request.args.get('directory', '')
+    data = base64.b64decode(directory).decode(encoding='utf-8')
+    respond = oneline_command(client_uuid, 'remove_file', {
+        'directory': data
+    })
+    return ''
