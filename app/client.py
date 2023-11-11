@@ -88,7 +88,9 @@ def handle(client_socket):
     elif command == 'remove_file':
         directory = request.json.get('directory', '')
         if os.path.isfile(directory):
-            try:os.remove(directory)
+            try:
+                os.remove(directory)
+                time.sleep(0.5)
             except:pass
     elif command == 'save_file':
         save_file(client_socket, request)

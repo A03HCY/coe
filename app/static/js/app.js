@@ -75,7 +75,7 @@ function generate() {
     $('#trans-folder-files').html(`<mdui-circular-progress class="bar-center-element"></mdui-circular-progress>`);
     $.ajax({
         method: 'GET',
-        url: '/api/folder_files?uuid=' + client_uuid + '&directory=' + Base64.encode(directory),
+        url: '/api/folder_files?uuid=' + client_uuid + '&directory=' + $.base64_encode(directory),
         success: function (response) {
             response = JSON.parse(response);
             $.info('请求成功');
@@ -102,13 +102,15 @@ function file_trans(self, view) {
     let name = self.attr('name');
     let client_uuid = $('#trans-select').val();
     let directory = $.join_path($('#trans-dir').val(), name)
-    let api = '/api/trans_file?uuid=' + client_uuid + '&directory=' + Base64.encode(directory)
+    let api = '/api/trans_file?uuid=' + client_uuid + '&directory=' + $.base64_encode(directory)
     if (view) {
+        let client_info = online_clients[client_uuid][1];
         let data = {
             'file_name': name,
             'directory': directory,
             'client_uuid': client_uuid,
-            'url': api
+            'url': api,
+            'client_info':client_info
         }
         $.diff_page('/view', data)
     } else {
@@ -122,7 +124,7 @@ function delet(self) {
     let client_info = online_clients[client_uuid][1];
     let name = self.attr('name');
     let directory = $.join_path($('#trans-dir').val(), name)
-    let api = '/api/remove_file?uuid=' + client_uuid + '&directory=' + Base64.encode(directory);
+    let api = '/api/remove_file?uuid=' + client_uuid + '&directory=' + $.base64_encode(directory);
     mdui.confirm({
         icon: 'delete_outlined',
         headline: `确定要从 ${client_info['Computer Name']} 上删除 ${name} 文件吗?`,

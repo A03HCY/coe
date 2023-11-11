@@ -22,7 +22,6 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='xterm/css/xterm.css') }}">
     <script src="{{ url_for('static', filename='xterm/lib/xterm.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/base64.js') }}"></script>
 
     <style>
         .hidden {
@@ -40,6 +39,11 @@
             top: 0;
             bottom: 0;
             margin: auto;
+        }
+        .fixed-fab {
+            position: fixed;
+            right: 32px;
+            bottom: 32px;
         }
     </style>
 
@@ -89,10 +93,6 @@
                 <td id="computer-cpu"></td>
             </tr>
             <tr>
-                <td>频率</td>
-                <td id="computer-frequency"></td>
-            </tr>
-            <tr>
                 <td>内存</td>
                 <td id="computer-memory"></td>
             </tr>
@@ -100,13 +100,13 @@
     </div>
     <div id="trans-panel" class="hidden" style="overflow: auto;height: 100%;">
         <mdui-button onclick="$.reload_select('#trans-select')">刷新列表</mdui-button>
-        <mdui-button onclick="generate()">获取信息</mdui-button>
+        <mdui-button onclick="generate()">刷新目录</mdui-button>
         <mdui-button onclick="parent_folder()">上级目录</mdui-button>
         <mdui-select id="trans-select" variant="outlined" placeholder="未选择目标" icon="computer">
         </mdui-select>
         <mdui-text-field variant="outlined" id="trans-dir" label="目录"></mdui-text-field>
-        <div id="trans-folder-files" style="overflow: auto;height: 100%;width: 100%;"></div>
-
+        <div id="trans-folder-files" style="overflow: auto;height: 100%;width: 100%;margin-bottom: 96px;"></div>
+        <mdui-fab class="fixed-fab" icon="add"></mdui-fab>
     </div>
     <div id="control-panel" class="hidden" style="overflow: auto">
         <mdui-button onclick="$.reload_select('#control-select')">刷新列表</mdui-button>

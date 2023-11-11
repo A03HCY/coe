@@ -1,19 +1,21 @@
 let data = $.diff_page()
 
-if (data.file_name == undefined) {
-    /*
+if (data.file_name == undefined || data == {}) {
     mdui.alert({
         headline: '没有选择指定的文件预览',
         description: '请重新选择文件',
         confirmText: '了解',
         icon: 'error_outline',
-        onConfirm: () => window.close()
+        onConfirm: () => {
+            $('#page').html(`<mdui-icon class="center-element" name="error_outline" style="font-size: 48px"></mdui-icon>`)
+            window.close()
+        }
     });
     throw 'no data'
-    */
 } else {
     data.extension = data.file_name.slice(data.file_name.lastIndexOf('.'));
     $('#title').html(data.file_name)
+    $.title(`${data.file_name} | ${data.client_info['Computer Name']}`)
 }
 
 function read(type, func) {
