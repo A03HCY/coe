@@ -24,6 +24,35 @@ $('#control').on('click', (e) => {
     $('#index-panel').addClass('hidden');
 });
 
+// 其他函数
+
+let icon_map = {
+    'audio_file--outlined': ['.mp3', '.wav', '.ogg'],
+    'video_file--outlined': ['.mp4', '.flv'],
+    'photo--outlined': ['.png', '.jpg', '.jpeg', '.svg'],
+    'book--outlined': ['.txt', '.md'],
+    'font_download--outlined': ['.tff'],
+    'link--outlined': ['.lnk'],
+    'folder_zip--outlined': ['.zip', '.rar', '.7z'],
+    'apps--outlined': ['.app', '.exe', '.msi']
+}
+
+$.load_script(
+    '/static.js/language_map.js', () => {
+        icon_map['code'] = Object.keys(language_map)
+    }
+)
+
+function find_icon(extn) {
+    extn = $.file_extension(extn)
+    for (let icon in icon_map) {
+        if (icon_map[icon].includes(extn)) {
+            return icon
+        }
+    }
+    return 'insert_drive_file--outlined'
+}
+
 // Panel 区域函数
 
 function show_info() {
@@ -55,12 +84,16 @@ function generate_folder_files(json_data) {
     // 生成文件项的HTML代码
     for (let file_name in json_data[1]) {
         let file = json_data[1][file_name];
+        let icon = find_icon(file_name)
         let description = `${file['date']}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${$.bytes_resize(file['size']).replace(' ', '')}`;
         html += `<mdui-list-item alignment="center" name="${file_name}" description="${description}" nonclickable="true" end-icon="arrow_right">`;
         html += `  ${file_name}`;
-        html += `  <mdui-icon slot="icon" name="insert_drive_file--outlined"></mdui-icon>`;
+        html += `  <mdui-icon slot="icon" name="${icon}"></mdui-icon>`;
+        if (file['size'] <= 30 * 1024 * 1024) {
+            html += `  <mdui-button-icon onclick="file_trans(this, true)" slot="end-icon" icon="file_open--outlined"></mdui-button-icon>`;
+        }
         html += `  <mdui-button-icon onclick="delet(this)" slot="end-icon" icon="delete_outlined"></mdui-button-icon>`;
-        html += `  <mdui-button-icon onclick="file_trans(this, true)" slot="end-icon" icon="file_open--outlined"></mdui-button-icon>`;
+        html += `  <mdui-button-icon onclick="rename(this)" slot="end-icon" icon="drive_file_rename_outline"></mdui-button-icon>`;
         html += `  <mdui-button-icon onclick="file_trans(this)" slot="end-icon" icon="file_download--outlined"></mdui-button-icon>`;
         html += `</mdui-list-item>`;
     }
@@ -99,6 +132,7 @@ function parent_folder() {
 
 function file_trans(self, view) {
     self = $(self).parent();
+    let size = self.attr('description');
     let name = self.attr('name');
     let client_uuid = $('#trans-select').val();
     let directory = $.join_path($('#trans-dir').val(), name)
@@ -107,10 +141,11 @@ function file_trans(self, view) {
         let client_info = online_clients[client_uuid][1];
         let data = {
             'file_name': name,
+            'size': size.split('|')[1].replace(/\s/g, ''),
             'directory': directory,
             'client_uuid': client_uuid,
             'url': api,
-            'client_info':client_info
+            'client_info': client_info
         }
         $.diff_page('/view', data)
     } else {
@@ -127,7 +162,7 @@ function delet(self) {
     let api = '/api/remove_file?uuid=' + client_uuid + '&directory=' + $.base64_encode(directory);
     mdui.confirm({
         icon: 'delete_outlined',
-        headline: `确定要从 ${client_info['Computer Name']} 上删除 ${name} 文件吗?`,
+        headline: `确定要从 ${client_info['Computer Name']} 上删除 '${name}' 文件吗?`,
         description: '删除后文件将无法恢复',
         confirmText: '确认',
         cancelText: '取消',
@@ -136,6 +171,33 @@ function delet(self) {
                 method: 'GET',
                 url: api,
                 success: generate()
+            });
+        },
+    });
+}
+
+function rename(self) {
+    self = $(self).parent()
+    let client_uuid = $('#trans-select').val()
+    let client_info = online_clients[client_uuid][1]
+    let name = self.attr('name')
+    let directory = $.join_path($('#trans-dir').val(), name)
+    mdui.prompt({
+        icon: 'drive_file_rename_outline',
+        headline: `在 ${client_info['Computer Name']} 上重命名 '${name}' 文件`,
+        confirmText: "确定",
+        cancelText: "取消",
+        onConfirm: (value) => {
+            let api = '/api/rename_path_file?uuid=' + client_uuid + '&directory=' + $.base64_encode(directory) + '&new=' + $.base64_encode(value);
+            $('#trans-folder-files').html(`<mdui-circular-progress class="bar-center-element"></mdui-circular-progress>`);
+            $.ajax({
+                method: 'GET',
+                url: api,
+                success: () => {
+                    $.time(() => {
+                        generate()
+                    }, 100)
+                }
             });
         },
     });

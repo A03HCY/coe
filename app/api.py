@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, send_file, Response, make_response
+from flask import Blueprint, jsonify, request, send_file, Response, make_response, current_app, stream_with_context
 from server import *
 import mimetypes
 import json, base64, os
@@ -42,6 +42,23 @@ def load_screen_stream(client_uuid:str, quality:int):
 def save_file(client_uuid:str):
     pass
 
+
+def base64_decode(text):
+    # 替换特殊字符
+    text = text.replace('-', '+').replace('_', '/')
+    # 填充缺失的字符
+    padding = len(text) % 4
+    if padding > 0:
+        text += '=' * (4 - padding)
+    # 解码 Base64 字符串
+    decoded_bytes = base64.b64decode(text)
+    try:
+        # 使用 UTF-8 编解码器将字节解码为字符串
+        decoded_string = decoded_bytes.decode('utf-8')
+    except UnicodeDecodeError:
+        # 如果 UTF-8 解码失败，则回退到使用 Latin-1 编解码器
+        decoded_string = decoded_bytes.decode('latin-1')
+    return decoded_string
 
 
 web_api = Blueprint('api', __name__)
@@ -95,7 +112,7 @@ def command():
 def folder_files():
     client_uuid = request.args.get('uuid', '')
     data = request.args.get('directory', '')
-    data = base64.b64decode(data).decode(encoding='utf-8')
+    data = base64_decode(data)
     respond = oneline_command(client_uuid, 'folder_files', {
         'directory': data
     })
@@ -116,11 +133,11 @@ def screen_stream():
     if not is_alive(client_uuid): return ''
     return Response(load_screen_stream(client_uuid, quality), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@web_api.route('/trans_file', methods=['GET'])
+'''@web_api.route('/trans_file', methods=['GET'])
 def trans_file():
     client_uuid = request.args.get('uuid', '')
     directory = request.args.get('directory', '')
-    data = base64.b64decode(directory).decode(encoding='utf-8')
+    data = base64_decode(directory)
     respond = oneline_command(client_uuid, 'trans_file', {
         'directory': data
     })
@@ -128,14 +145,59 @@ def trans_file():
     respons = make_response(respond.meta)
     mime_type = mimetypes.guess_type(file_name)[0]
     respons.headers['Content-Disposition'] = 'attachment; filename={}'.format(file_name.encode().decode('latin-1'))
-    return respons
+    return respons'''
 
 @web_api.route('/remove_file', methods=['GET'])
 def remove_file():
     client_uuid = request.args.get('uuid', '')
     directory = request.args.get('directory', '')
-    data = base64.b64decode(directory).decode(encoding='utf-8')
+    data = base64_decode(directory)
     respond = oneline_command(client_uuid, 'remove_file', {
         'directory': data
     })
     return ''
+
+@web_api.route('/rename_path_file', methods=['GET'])
+def rename_path_file():
+    client_uuid = request.args.get('uuid', '')
+    directory = request.args.get('directory', '')
+    new = request.args.get('new', '')
+    data = base64_decode(directory)
+    new = base64_decode(new)
+    respond = oneline_command(client_uuid, 'rename_path_file', {
+        'directory': data,
+        'new': new
+    })
+    return str(respond.json.get('result', 'unknow'))
+
+@web_api.route('/trans_file')
+def trans_file():
+    client_uuid = request.args.get('uuid', '')
+    directory = request.args.get('directory', '')
+    seek = request.args.get('seek', '')
+    byte = request.args.get('byte', '')
+    data = base64_decode(directory)
+    print(data)
+    if seek and byte:
+        file_info = oneline_command(client_uuid, 'folder_files', {
+            'directory': os.path.dirname(data)
+        })
+        file_info = file_info.json['file_list'][1].get(os.path.split(data)[1])
+        file_size = file_info['size']
+        print(seek, '-', byte, '-', seek+byte, '/', file_size)
+        respond = oneline_command(client_uuid, 'read_file', {
+            'directory': data,
+            'seek': seek,
+            'byte': byte
+        })
+        return respond.meta
+    else:
+        # 不支持断点续传，直接发送整个文件
+        respond = oneline_command(client_uuid, 'trans_file', {
+            'directory': data
+        })
+        file_name = os.path.basename(directory)
+        respons = make_response(respond.meta)
+        mime_type = mimetypes.guess_type(file_name)[0]
+        respons.headers['Content-Disposition'] = 'attachment; filename={}'.format(file_name.encode().decode('latin-1'))
+        return respons

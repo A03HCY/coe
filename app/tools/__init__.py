@@ -131,3 +131,39 @@ def folder_files(directory:str) -> list:
             files[entry.name] = file_info
 
     return result
+
+def rename(path, name):
+    # 检查路径是否存在
+    if not os.path.exists(path):
+        print(f"├ 路径 '{path}' 不存在")
+        return False
+    
+    # 获取文件或文件夹的完整路径
+    full_path = os.path.abspath(path)
+    
+    # 检查是否为文件夹
+    if os.path.isdir(full_path):
+        # 重命名文件夹
+        folder_path = os.path.dirname(full_path)
+        new_path = os.path.join(folder_path, name)
+        try:
+            os.rename(full_path, new_path)
+            print(f"├ 成功将文件夹 '{full_path}' 重命名为 '{new_path}'")
+            return True
+        except OSError:
+            print(f"├ 无法将文件夹 '{full_path}' 重命名为 '{new_path}'")
+            return False
+    elif os.path.isfile(full_path):
+        # 重命名文件
+        folder_path, file_name = os.path.split(full_path)
+        new_file_path = os.path.join(folder_path, name)
+        try:
+            os.rename(full_path, new_file_path)
+            print(f"├ 成功将文件 '{full_path}' 重命名为 '{new_file_path}'")
+            return True
+        except OSError:
+            print(f"├ 无法将文件 '{full_path}' 重命名为 '{new_file_path}'")
+            return False
+    else:
+        print(f"├ 提供的路径 '{full_path}' 不是有效的文件夹或文件")
+        return False

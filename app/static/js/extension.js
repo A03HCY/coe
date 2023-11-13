@@ -315,6 +315,45 @@ $.extend({
     },
     title: (title) => {
         document.title = title
+    },
+    time: (func, time) => {
+        setTimeout(func, time);
+    },
+    load_video: (id, type, api) => {
+        $.load_script(
+            '/static/flv.js/flv.min.js', (id, type, api) => {
+                if (flvjs.isSupported()) {
+                    var videoElement = document.getElementById(id);
+                    var flvPlayer = flvjs.createPlayer({
+                        type: type,
+                        url: api
+                    });
+                    flvPlayer.attachMediaElement(videoElement);
+                    flvPlayer.load();
+                    flvPlayer.play();
+                }
+            }
+        )
+    },
+    extract_integer_part: (fileSize) => {
+        let regex = /^(\d+)/;
+        let match = regex.exec(fileSize.replace(/\s/g, ''));
+        if (match) {
+            return parseInt(match[0]);
+        }
+        return null;
+    },
+    extract_unit: (fileSize) => {
+        let regex = /([A-Za-z]+)/;
+        let match = regex.exec(fileSize);
+        if (match) {
+            return match[0];
+        }
+        return null;
+    },
+    file_extension: (filename) => {
+        let extension = filename.split('.').pop();
+        return '.' + extension.toLowerCase();
     }
 
 });

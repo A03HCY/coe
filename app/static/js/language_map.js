@@ -4,5 +4,7 @@ const language_map = {
     '.py': 'python',
     '.java': 'java',
     '.c':'c',
-    '.json':'json'
+    '.json':'json',
+    '.ini':'ini',
+    '.conf':'conf'
 };
