@@ -354,6 +354,11 @@ $.extend({
     file_extension: (filename) => {
         let extension = filename.split('.').pop();
         return '.' + extension.toLowerCase();
+    },
+    colorify: (data) => {
+        for (let name in data) {
+            $(`mdui-icon[name="${name}"]`).css('color', data[name]);
+        }
     }
 
 });

@@ -39,6 +39,15 @@
             bottom: 0;
             margin: auto;
         }
+        
+        .bottom-element {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
 
         #page {
             width: 100%;
@@ -57,10 +66,13 @@
         <mdui-button-icon icon="menu"></mdui-button-icon>
         <mdui-top-app-bar-title id="title">View</mdui-top-app-bar-title>
         <div style="flex-grow: 1"></div>
+        <!--
         <mdui-button-icon onclick="print_page()" icon="print--outlined"></mdui-button-icon>
+        -->
         <mdui-button-icon onclick="$.download_file(data.url, data.file_name)" icon="file_download--outlined"></mdui-button-icon>
         <mdui-button-icon onclick="window.close()" icon="close"></mdui-button-icon>
     </mdui-top-app-bar>
+    
     <div id="page">
         <mdui-circular-progress class="center-element"></mdui-circular-progress>
     </div>

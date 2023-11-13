@@ -36,7 +36,7 @@ let unit = $.extract_unit(data.size)
 let size = parseInt($.extract_integer_part(data.size))
 
 if (['B', 'KB'].includes(unit)) { } else if (unit == 'MB') {
-    if (size > 30){
+    if (size > 30) {
         alert_size()
         throw 'too big'
     }
@@ -58,6 +58,7 @@ function read(type, func) {
 function markdown() {
     read('text', (respons) => {
         $('#page').html(marked(respons));
+        $.info('解析完成')
     })
 }
 
@@ -67,6 +68,7 @@ function code() {
         read('text', (respon) => {
             $('#page').html(`<pre><code class="LAN">`.replace('LAN', map) + respon + `</code></pre>`)
             hljs.highlightAll()
+            $.info('解析完成')
         })
     })
 }
@@ -76,7 +78,7 @@ function audio() {
         url: data.url,
         method: 'GET',
         xhrFields: {
-            responseType: 'blob'
+            responseType: 'blob',
         },
         success: function (data) {
             let html = `<audio id="audio_player" class="center-element" style="width=100%" controls><source type="audio/mpeg">Your browser does not support this audio format.</audio>`
@@ -85,10 +87,11 @@ function audio() {
             const audioURL = URL.createObjectURL(data);
             audio_player.src = audioURL;
             audio_player.play();
+            $.info('解析完成')
         },
         error: function (xhr, status, error) {
             $.info('请求失败: ' + error);
-        }
+        },
     });
 }
 
@@ -104,6 +107,7 @@ function video() {
             $('#page').html(html)
             const videoURL = URL.createObjectURL(data);
             $.load_video('video_player', 'mp4', videoURL)
+            $.info('解析完成')
         },
         error: function (xhr, status, error) {
             $.info('请求失败: ' + error);
@@ -131,7 +135,6 @@ for (let func in func_ext) {
         try {
             window[func]()
             done = true
-            $.info('解析完成')
         } catch (e) { }
         break
     }

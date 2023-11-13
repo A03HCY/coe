@@ -196,8 +196,11 @@ def trans_file():
         respond = oneline_command(client_uuid, 'trans_file', {
             'directory': data
         })
+        file_leng = respond.leng
         file_name = os.path.basename(directory)
-        respons = make_response(respond.meta)
         mime_type = mimetypes.guess_type(file_name)[0]
+        respons = make_response(respond.meta)
+        respons.headers['Content-Length'] = file_leng
+        respons.headers['Content-Type'] = 'application/octet-stream'
         respons.headers['Content-Disposition'] = 'attachment; filename={}'.format(file_name.encode().decode('latin-1'))
         return respons

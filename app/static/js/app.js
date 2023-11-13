@@ -26,19 +26,8 @@ $('#control').on('click', (e) => {
 
 // 其他函数
 
-let icon_map = {
-    'audio_file--outlined': ['.mp3', '.wav', '.ogg'],
-    'video_file--outlined': ['.mp4', '.flv'],
-    'photo--outlined': ['.png', '.jpg', '.jpeg', '.svg'],
-    'book--outlined': ['.txt', '.md'],
-    'font_download--outlined': ['.tff'],
-    'link--outlined': ['.lnk'],
-    'folder_zip--outlined': ['.zip', '.rar', '.7z'],
-    'apps--outlined': ['.app', '.exe', '.msi']
-}
-
 $.load_script(
-    '/static.js/language_map.js', () => {
+    '/static/js/language_map.js', () => {
         icon_map['code'] = Object.keys(language_map)
     }
 )
@@ -89,7 +78,7 @@ function generate_folder_files(json_data) {
         html += `<mdui-list-item alignment="center" name="${file_name}" description="${description}" nonclickable="true" end-icon="arrow_right">`;
         html += `  ${file_name}`;
         html += `  <mdui-icon slot="icon" name="${icon}"></mdui-icon>`;
-        if (file['size'] <= 30 * 1024 * 1024) {
+        if (file_preview.includes($.file_extension(file_name)) && file['size'] <= 30 * 1024 * 1024) {
             html += `  <mdui-button-icon onclick="file_trans(this, true)" slot="end-icon" icon="file_open--outlined"></mdui-button-icon>`;
         }
         html += `  <mdui-button-icon onclick="delet(this)" slot="end-icon" icon="delete_outlined"></mdui-button-icon>`;
