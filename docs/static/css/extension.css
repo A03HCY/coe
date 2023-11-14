@@ -1,0 +1,16 @@
+.hidden {
+    display: none;
+}
+
+.hidden-op {
+    opacity: 0;
+}
+
+.center-element {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
